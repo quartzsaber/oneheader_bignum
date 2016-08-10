@@ -13,9 +13,9 @@ protected:
 
 public:
     bignum() {}
-    bignum(const uintmax_t init) { copy(init); };
-    bignum(const bignum& init);
-    bignum& copy(uintmax_t init);
+    bignum(const uintmax_t init) { copy(init); }
+    bignum(const bignum& init) { copy(init); }
+    bignum& copy(const uintmax_t init);
     bignum& copy(const bignum& x);
 
     bignum& add(const bignum& x);
@@ -25,10 +25,10 @@ public:
     bignum& inc();
     bignum& dec();
 
-    bignum& band(const bignum& x);
-    bignum&  bor(const bignum& x);
-    bignum& bxor(const bignum& x);
-    bignum& bnot();
+    bignum& band(const bignum& x) { num&=x.num; }
+    bignum&  bor(const bignum& x) { num|=x.num; }
+    bignum& bxor(const bignum& x) { num^=x.num; }
+    bignum& bnot() { num=~num; }
 
     bignum& shr(const unsigned int x) { num>>=x; return *this; }
     bignum& shl(const unsigned int x) { num<<=x; return *this; }
@@ -39,13 +39,14 @@ public:
 };
 
 template<int BITS>
-bignum<BITS>& bignum<BITS>::copy(uintmax_t x) {
+bignum<BITS>& bignum<BITS>::copy(const uintmax_t x) {
     num=x;
-    /*while(x!=0) {
-        num[0]=x&1;
-        shl(1);
-        x>>=1;
-    }*/
+    return *this;
+}
+
+template<int BITS>
+bignum<BITS>& bignum<BITS>::copy(const bignum<BITS>& x) {
+    num=x.num;
     return *this;
 }
 
@@ -85,11 +86,3 @@ std::string bignum<BITS>::toString(int base) {
 }
 
 #endif // BIGNUM_H_INCLUDED
-using namespace std;
-
-int main() {
-    bignum<8> num(0b10);
-    num.sub(1);
-    cout << num.toString();
-    return 0;
-}

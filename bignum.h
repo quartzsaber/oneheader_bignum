@@ -74,13 +74,30 @@ bignum<BITS>& bignum<BITS>::sub(const bignum<BITS>& x) {
     t.copy(x);
     t.bnot();
     t.inc();
-    return add(x);
+    add(t);
+    return *this;
+}
+
+template<int BITS>
+bignum<BITS>& bignum<BITS>::inc() {
+    //With a nice trick, we assume there's a virtual carry.
+    for(int i=0; i<BITS && (i==0 ? true : !num[i-1]); i++)
+        num[i]=!num[i];
+    return *this;
+}
+
+template<int BITS>
+bignum<BITS>& bignum<BITS>::dec() {
+    //Same as inc() :)
+    for(int i=0; i<BITS && (i==0 ? true : num[i-1]); i++)
+        num[i]=!num[i];
+    return *this;
 }
 
 template<int BITS>
 std::string bignum<BITS>::toString(int base) {
     std::string ret;
-    for(int i=BITS; i>=0; i--)
+    for(int i=BITS-1; i>=0; i--)
         ret.push_back(num[i]?'1':'0');
     return ret;
 }

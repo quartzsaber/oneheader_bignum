@@ -20,22 +20,32 @@ public:
 
     bignum& add(const bignum& x);
     bignum& sub(const bignum& x);
-    bignum& mul(const bignum& x);
-    bignum& div(const bignum& x);
+    bignum mul(bignum x);
+    bignum div(bignum x);
+    bignum mod(bignum x);
     bignum& inc();
     bignum& dec();
 
-    bignum& band(const bignum& x) { num&=x.num; }
-    bignum&  bor(const bignum& x) { num|=x.num; }
-    bignum& bxor(const bignum& x) { num^=x.num; }
-    bignum& bnot() { num=~num; }
+    bignum& band(const bignum& x) { num&=x.num; return *this; }
+    bignum&  bor(const bignum& x) { num|=x.num; return *this; }
+    bignum& bxor(const bignum& x) { num^=x.num; return *this; }
+    bignum& bnot() { num=~num; return *this; }
 
     bignum& shr(const unsigned int x) { num>>=x; return *this; }
     bignum& shl(const unsigned int x) { num<<=x; return *this; }
     bignum& ror(const unsigned int x);
     bignum& rol(const unsigned int x);
 
+    bool eq(const bignum& x) const { return num==x.num; }
+    bool gre(const bignum& x) const;
+    bool les(const bignum& x) const;
+    bool geq(const bignum& x) const { return !les(x); }
+    bool leq(const bignum& x) const { return !gre(x); }
+    bool empty() { return !num.any(); }
+
     std::string toString(int base=2);
+    operator intmax_t();
+    operator uintmax_t();
 };
 
 template<int BITS>
@@ -79,6 +89,47 @@ bignum<BITS>& bignum<BITS>::sub(const bignum<BITS>& x) {
 }
 
 template<int BITS>
+bignum<BITS> bignum<BITS>::mul(bignum<BITS> x) {
+    bignum<BITS> now(*this), ret;
+    while(!x.empty()) {
+        if(x.num[0])
+            ret.add(now);
+        now.shl(1);
+        x.shr(1);
+    }
+    return ret;
+}
+
+/* Not done!!!
+template<int BITS>
+bignum<BITS> bignum<BITS>::div(bignum<BITS> x) {
+    bignum<BITS> quo, rem;
+    for(int i=0; i<BITS; i++) {
+        rem.shl(1);
+        rem.num[i]=num[i];
+        if(rem.geq(x)) {
+            rem.sub(x);
+            quo.num[i]=true;
+        }
+    }
+    return quo;
+}
+
+template<int BITS>
+bignum<BITS> bignum<BITS>::mod(bignum<BITS> x) {
+    bignum<BITS> quo, rem;
+    for(int i=0; i<BITS; i++) {
+        rem.shl(1);
+        rem.num[i]=num[i];
+        if(rem.geq(x)) {
+            rem.sub(x);
+            quo.num[i]=true;
+        }
+    }
+    return rem;
+}*/
+
+template<int BITS>
 bignum<BITS>& bignum<BITS>::inc() {
     //With a nice trick, we assume there's a virtual carry.
     for(int i=0; i<BITS && (i==0 ? true : !num[i-1]); i++)
@@ -95,10 +146,33 @@ bignum<BITS>& bignum<BITS>::dec() {
 }
 
 template<int BITS>
+bool bignum<BITS>::gre(const bignum<BITS>& x) const {
+    for(int i=BITS-1; i>=0; i--)
+        if(num[i] && !x.num[i])
+            return true;
+        else if(!num[i] && x.num[i])
+            return false;
+    return false;
+}
+
+template<int BITS>
+bool bignum<BITS>::les(const bignum<BITS>& x) const {
+    for(int i=BITS-1; i>=0; i--)
+        if(!num[i] && x.num[i])
+            return true;
+        else if(num[i] && !x.num[i])
+            return false;
+    return false;
+}
+
+template<int BITS>
 std::string bignum<BITS>::toString(int base) {
     std::string ret;
-    for(int i=BITS-1; i>=0; i--)
-        ret.push_back(num[i]?'1':'0');
+    if(base==2) {
+        /*for(int i=BITS-1; i>=0; i--)
+            ret.push_back(num[i]?'1':'0');*/
+        return num.to_string();
+    }
     return ret;
 }
 

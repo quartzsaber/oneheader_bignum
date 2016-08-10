@@ -28,3 +28,6 @@ Long story short, just `#include "bignum.h"` and you can just use it!
     bignum& ror(const unsigned int x); //Rotate right
     bignum& rol(const unsigned int x); //Rotate left
 </pre>
+
+About license:
+See `LICENSE` file.

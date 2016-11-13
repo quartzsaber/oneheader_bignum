@@ -3,12 +3,13 @@
 
 #include <bitset>
 #include <string>
+#include <cstddef> //std::size_t
 #include <stdint.h>
 
 template<int BITS>
 class bignum {
 protected:
-    //index 0 = LSB
+    //[0] = LSB
     std::bitset<BITS> num;
 
 public:
@@ -31,10 +32,10 @@ public:
     bignum& bxor(const bignum& x) { num^=x.num; return *this; }
     bignum& bnot() { num=~num; return *this; }
 
-    bignum& shr(const unsigned int x) { num>>=x; return *this; }
-    bignum& shl(const unsigned int x) { num<<=x; return *this; }
-    bignum& ror(const unsigned int x);
-    bignum& rol(const unsigned int x);
+    bignum& shr(const std::size_t x) { num>>=x; return *this; }
+    bignum& shl(const std::size_t x) { num<<=x; return *this; }
+    bignum& ror(const std::size_t x);
+    bignum& rol(const std::size_t x);
 
     bool eq(const bignum& x) const { return num==x.num; }
     bool gre(const bignum& x) const;
@@ -46,6 +47,29 @@ public:
     std::string toString(int base=2);
     operator intmax_t();
     operator uintmax_t();
+    
+    bignum& operator +=(const bignum& x) { add(x); return *this; }
+    bignum& operator -=(const bignum& x) { sub(x); return *this; }
+    bignum operator *(const bignum& x) { return mul(x); }
+    bignum operator /(const bignum& x) { return div(x); }
+    bignum operator %(const bignum& x) { return mod(x); }
+    bignum& operator ++() { inc(); return *this; }
+    bignum& operator --() { dec(); return *this; }
+    /* 
+     * Should there be post-increment?? Is it dont by compiler?
+     * And if so, will having one help performance/memory-footprint/etc?
+     */
+    bignum& operator &=(const bignum& x) { band(x); return *this; }
+    bignum& operator |=(const bignum& x) { bor(x); return *this; }
+    bignum& operator ^=(const bignum& x) { bxor(x); return *this; }
+    bignum& operator ~=() { bnot(); return *this; }
+    bignum& operator >>=(const std::size_t x) { bshr(x); return *this; }
+    bignum& operator <<=(const std::size_t x) { bshl(x); return *this; }
+    bool operator ==(const bignum& x) { return eq(x); }
+    bool operator >(const bignum& x) { return gre(x); }
+    bool operator <(const bignum& x) { return les(x); }
+    bool operator <=(const bingum& x) { return geq(x); }
+    bool operator >=(const bignum& x) { return leq(x); }
 };
 
 template<int BITS>
@@ -131,7 +155,7 @@ bignum<BITS> bignum<BITS>::mod(bignum<BITS> x) {
 
 template<int BITS>
 bignum<BITS>& bignum<BITS>::inc() {
-    //With a nice trick, we assume there's a virtual carry.
+    //Thinks there was a carry. It allows to quit when the carry is cleared.
     for(int i=0; i<BITS && (i==0 ? true : !num[i-1]); i++)
         num[i]=!num[i];
     return *this;

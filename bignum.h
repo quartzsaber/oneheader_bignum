@@ -18,6 +18,7 @@ public:
     bignum(const bignum& init) { copy(init); }
     bignum& copy(const uintmax_t init);
     bignum& copy(const bignum& x);
+    void swap(bignum<BITS>& other);
 
     bignum& add(const bignum& x);
     bignum& sub(const bignum& x);
@@ -82,6 +83,14 @@ template<int BITS>
 bignum<BITS>& bignum<BITS>::copy(const bignum<BITS>& x) {
     num=x.num;
     return *this;
+}
+
+template<int BITS>
+void bignum<BITS>::swap(bignum<BITS>& other) {
+    //Optimization needed
+    bitset<BITS> tmp = num;
+    num = other.num;
+    other.num = tmp;
 }
 
 template<int BITS>
@@ -194,5 +203,9 @@ std::string bignum<BITS>::to_string(const int base) {
     static_assert(base==2); //For now, it only works for base 2
     return num.to_string();
 }
+
+//Proxy function for std::swap replacement
+template<int BITS>
+void swap(bitset<BITS>& x, bitset<BITS>& y) { x.swap(y); }
 
 #endif // BIGNUM_H_INCLUDED

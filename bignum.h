@@ -44,7 +44,7 @@ public:
     bool leq(const bignum& x) const { return !gre(x); }
     bool empty() { return !num.any(); }
 
-    std::string toString(int base=2);
+    std::string to_string(const int base=2);
     operator intmax_t();
     operator uintmax_t();
     
@@ -190,14 +190,9 @@ bool bignum<BITS>::les(const bignum<BITS>& x) const {
 }
 
 template<int BITS>
-std::string bignum<BITS>::toString(int base) {
-    std::string ret;
-    if(base==2) {
-        /*for(int i=BITS-1; i>=0; i--)
-            ret.push_back(num[i]?'1':'0');*/
-        return num.to_string();
-    }
-    return ret;
+std::string bignum<BITS>::to_string(const int base) {
+    static_assert(base==2); //For now, it only works for base 2
+    return num.to_string();
 }
 
 #endif // BIGNUM_H_INCLUDED
